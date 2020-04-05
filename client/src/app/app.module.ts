@@ -8,7 +8,9 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {MaterialDesignModule} from "./material-design/material-design.module";
 import { BarChartComponent } from './components/bar-chart/bar-chart.component';
 import {ChartsModule} from "ng2-charts";
+import { SocketIoModule, SocketIoConfig } from 'ngx-socket-io';
 
+const config: SocketIoConfig = { url: 'http://localhost:5000', options: {} };
 @NgModule({
   declarations: [
     AppComponent,
@@ -19,6 +21,7 @@ import {ChartsModule} from "ng2-charts";
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,
+    SocketIoModule.forRoot(config),
     MaterialDesignModule,
     ChartsModule
   ],
