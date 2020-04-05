@@ -6,17 +6,21 @@ import { AppComponent } from './app.component';
 import { HomeComponent } from './pages/home/home.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {MaterialDesignModule} from "./material-design/material-design.module";
+import { BarChartComponent } from './components/bar-chart/bar-chart.component';
+import {ChartsModule} from "ng2-charts";
 
 @NgModule({
   declarations: [
     AppComponent,
-    HomeComponent
+    HomeComponent,
+    BarChartComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,
-    MaterialDesignModule
+    MaterialDesignModule,
+    ChartsModule
   ],
   providers: [],
   bootstrap: [AppComponent]
