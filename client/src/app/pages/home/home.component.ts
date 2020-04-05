@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {ModelSocketService} from "../../services/model-socket.service";
 
 @Component({
@@ -8,15 +8,22 @@ import {ModelSocketService} from "../../services/model-socket.service";
 })
 export class HomeComponent implements OnInit {
 
+  reset = false;
+
   constructor(private modelSocket: ModelSocketService) {
-    this.modelSocket.epoch.subscribe(d => console.log(d));
   }
 
   ngOnInit() {
   }
 
   train(dataset: string) {
+    this.reset = !this.reset;
+    this.stop();
     this.modelSocket.train(dataset, 0.1);
+  }
+
+  stop() {
+    this.modelSocket.disconnect();
   }
 
 }

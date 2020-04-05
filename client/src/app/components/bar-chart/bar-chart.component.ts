@@ -1,13 +1,14 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
 import { ChartOptions, ChartType, ChartDataSets } from 'chart.js';
 import { Label } from 'ng2-charts';
+import {ModelSocketService} from "../../services/model-socket.service";
 
 @Component({
   selector: 'app-bar-chart',
   templateUrl: './bar-chart.component.html',
   styleUrls: ['./bar-chart.component.scss']
 })
-export class BarChartComponent implements OnInit {
+export class BarChartComponent implements OnInit, OnChanges {
 
   barChartOptions: ChartOptions = {
     responsive: true,
@@ -17,14 +18,25 @@ export class BarChartComponent implements OnInit {
   barChartPlugins = [];
   barChartData: ChartDataSets[];
 
-  @Input() labels: Label[] = ['1', '2', '3', '4', '5', '6'];
-  @Input() data: {data: Array<number>, label: string} = { data: [45, 37, 60, 70, 46, 33], label: 'Best Fruits' };
+  labels: Label[];
+  data: {data: Array<number>, label: string} = { data: [], label: 'Epoch Data' };
 
-  constructor() {
+  @Input() reset: boolean;
+
+  constructor(private modelSocket: ModelSocketService) {
+    this.modelSocket.epoch.subscribe(d => {
+      this.data.data.push(d.error);
+      this.labels = Array<string>(this.data.data.length).fill('').map((d: string, i: number) => `${i+1}`);
+    });
     this.barChartData = [this.data];
   }
 
   ngOnInit(): void {
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    this.labels = [];
+    this.data.data = [];
   }
 
 }
