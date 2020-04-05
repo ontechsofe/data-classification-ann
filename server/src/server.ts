@@ -1,22 +1,30 @@
 import * as express from "express";
+
+import {RandomHelper} from "./classes/RandomHelper";
 import {Model} from "./classes/Model";
 
 //Import dataset's
-import * as irisTraining from "./data-cleaning/cleaned-data/iris/iris-training.json";
-import * as irisTesting from "./data-cleaning/cleaned-data/iris/iris-testing.json";
+import * as irisData from "./data-cleaning/cleaned-data/iris/iris-formatted.json";
+import * as breastData from "./data-cleaning/cleaned-data/breast-cancer-wisconsin/breast-cancer-wisconsin-formatted.json";
 
-const formatIrisData = () => {
-    const formatData = (d: Array<number>) => {
-        let output = Array<number>(3).fill(0);
-        output[d[4]] = 1;
+const formatData = (data: Array<Array<number>>, inputSize: number, outputSize: number) => {
+    const inOutSplit = (d: Array<number>) => {
+        let output = Array<number>(outputSize).fill(0);
+        if (outputSize === 1) {
+            output[0] = d[inputSize];
+        } else {
+            output[d[inputSize]] = 1;
+        }
         return {
-            input: d.slice(0, 4),
+            input: d.slice(0, inputSize),
             output: output
         };
     };
-    const irisTrainingFormatted = irisTraining.map(formatData);
-    const irisTestingFormatted = irisTesting.map(formatData);
-    return {training: irisTrainingFormatted, testing: irisTestingFormatted};
+    const dataFormatted = data.map(inOutSplit);
+    RandomHelper.shuffle(dataFormatted);
+    const entries: number = dataFormatted.length;
+    const split: number = Math.floor(entries * 0.7);
+    return {training: dataFormatted.slice(0, split), testing: dataFormatted.slice(split, entries)};
 };
 
 const bodyParser = require("body-parser");
@@ -36,18 +44,22 @@ app.get("/", (req: any, res: any) => {
 });
 
 app.post("/train", (req: any, res: any) => {
-    let inputSize, layers, dataFunction;
+    let inputSize, layers, data;
     let sumOfSquaredErrors: number = Infinity;
+    let sumOfSquaredErrorsTesting: number = Infinity;
     const acceptedError = req.body.acceptedError;
     if (req.body.dataset === "iris") {
         inputSize = 4;
         layers = [7, 3];
-        dataFunction = formatIrisData;
+        data = irisData;
+    } else if (req.body.dataset === "breast") {
+        inputSize = 9;
+        layers = [15, 1];
+        data = breastData;
     }
-    let {training, testing} = dataFunction();
-
+    let {training, testing} = formatData(data, inputSize, layers[layers.length-1]);
     const model = new Model(inputSize, layers);
-    const epochs: Array<{ error: number, model: Model }> = [];
+    const epochs: Array<{ error: number, valError: number, model: Model }> = [];
     while (sumOfSquaredErrors > acceptedError) {
         sumOfSquaredErrors = 0;
         training.forEach(d => {
@@ -55,9 +67,15 @@ app.post("/train", (req: any, res: any) => {
             sumOfSquaredErrors += Math.pow(model.sumOfSquaredErrors(d.output), 2);
             model.backpropagation(d.output);
         });
+        sumOfSquaredErrorsTesting = 0;
+        testing.forEach(d => {
+            model.forwardpropagation(d.input);
+            sumOfSquaredErrorsTesting += Math.pow(model.sumOfSquaredErrors(d.output), 2);
+        });
         console.log(sumOfSquaredErrors);
         epochs.push({
             error: sumOfSquaredErrors,
+            valError: sumOfSquaredErrorsTesting,
             model: model
         });
     }
