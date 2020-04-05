@@ -1,2 +1,5 @@
 <button mat-raised-button (click)="train('iris')">Iris Data Set</button>
-<app-bar-chart></app-bar-chart>
+<button mat-raised-button (click)="train('breast')">Breast Cancer Data Set</button>
+<button mat-raised-button (click)="train('bank')">Market Data Set</button>
+<button mat-raised-button (click)="stop()" color="warn">Stop training</button>
+<app-bar-chart [reset]="reset"></app-bar-chart>
