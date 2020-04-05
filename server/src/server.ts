@@ -7,6 +7,7 @@ import {Model} from "./classes/Model";
 //Import dataset's
 import * as irisData from "./data-cleaning/cleaned-data/iris/iris-formatted.json";
 import * as breastData from "./data-cleaning/cleaned-data/breast-cancer-wisconsin/breast-cancer-wisconsin-formatted.json";
+import * as bankData from "./data-cleaning/cleaned-data/bank/bank-formatted.json";
 
 const bodyParser = require("body-parser");
 
@@ -63,9 +64,9 @@ io.on('connection', function (socket: Socket) {
             layers = [15, 1];
             data = breastData;
         } else if (dataset === "bank") {
-            inputSize = 20;
-            layers = [80, 1];
-            data = breastData;
+            inputSize = 16;
+            layers = [50, 1];
+            data = bankData;
         }
         let {training, testing} = formatData(data, inputSize, layers[layers.length-1]);
         // @ts-ignore
